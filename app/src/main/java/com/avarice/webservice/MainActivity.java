@@ -1,11 +1,15 @@
 package com.avarice.webservice;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.RequestQueue;
@@ -17,7 +21,13 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+//import android.view.WindowManager;
+
 public class MainActivity extends AppCompatActivity {
+
+    final String urlGetData = "http://192.168.0.100/androidwebservice/getdata.php";
+    private final int REQUEST_CODE = 123;
+
     ListView listStudent;
     ArrayList<Student> students;
     StudentAdapter adapter;
@@ -26,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 
         listStudent = findViewById(R.id.listViewStudent);
         students = new ArrayList<>();
@@ -60,6 +70,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void clickBtnGet(View view) {
-        getData("http://192.168.0.100/androidwebservice/getdata.php");
+        getData(urlGetData);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.menuAdd) {
+            startActivityForResult(new Intent(MainActivity.this, AddStudent.class), REQUEST_CODE);
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
+            getData(urlGetData);
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.add_student, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 }

@@ -1,7 +1,7 @@
 package com.avarice.webservice;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -16,56 +16,57 @@ import com.android.volley.toolbox.Volley;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AddStudent extends AppCompatActivity {
+public class UpdateStudentActivity extends AppCompatActivity {
 
-    final String urlInsert = "http://192.168.0.101/androidwebservice/insert.php";
-
+    String urlUpdate = "http://192.168.0.101/androidwebservice/update.php";
     EditText edtName, edtBorn, edtAddress;
+    private int id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_student);
+        setContentView(R.layout.activity_update_student);
 
-        edtName = findViewById(R.id.edtName);
-        edtBorn = findViewById(R.id.edtBorn);
-        edtAddress = findViewById(R.id.edtAddress);
+        Intent intent = getIntent();
+        Student student = (Student) intent.getSerializableExtra("dataStudent");
+        id = student.getId();
+        edtName = findViewById(R.id.edtNameUpdate);
+        edtBorn = findViewById(R.id.edtBornUpdate);
+        edtAddress = findViewById(R.id.edtAddressUpdate);
+        edtName.setText(student.getName());
+        edtBorn.setText(String.valueOf(student.getBorn()));
+        edtAddress.setText(student.getAddress());
     }
 
-    public void clickButtonAdd(View view) {
-        String name = edtName.getText().toString().trim();
-        String born = edtBorn.getText().toString().trim();
-        String address = edtAddress.getText().toString().trim();
-        if (name.isEmpty() || born.isEmpty() || address.isEmpty()) {
-            Toast.makeText(this, "Please add full data", Toast.LENGTH_SHORT).show();
-        } else {
-            addNewStudent(urlInsert, name, born, address);
-        }
-    }
-
-    public void clickButtonCancelAdd(View view) {
-        setResult(RESULT_CANCELED);
+    public void clickBtnCancelUpdate(View view) {
         finish();
     }
 
-    public void addNewStudent(String url, String name, String born, String address) {
+    public void clickBtnUpdate(View view) {
+        String name = edtName.getText().toString().trim();
+        String born = edtBorn.getText().toString().trim();
+        String address = edtAddress.getText().toString().trim();
+        if (name.equals("") || born.equals("") || address.equals("")) {
+            Toast.makeText(this, "Please fill the text", Toast.LENGTH_SHORT).show();
+        } else {
+            updateData(name, born, address);
+        }
+    }
+
+    private void updateData(String name, String born, String address) {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, urlUpdate,
                 response -> {
                     if (response.trim().equals("succeeded")) {
                         Toast.makeText(this, "Succeeded!", Toast.LENGTH_SHORT).show();
                         setResult(RESULT_OK);
                         finish();
                     }
-                },
-                error -> {
-                    Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
-                    Log.d("RETURN", "Error");
-                }
-        ){
+                }, error -> Toast.makeText(this, "Error! Please try again.", Toast.LENGTH_SHORT).show()) {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
+                params.put("inputId", String.valueOf(id));
                 params.put("inputName", name);
                 params.put("inputBorn", born);
                 params.put("inputAddress", address);

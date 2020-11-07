@@ -2,6 +2,7 @@ package com.avarice.webservice;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,21 +13,26 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 //import android.view.WindowManager;
 
 public class MainActivity extends AppCompatActivity {
 
-    final String urlGetData = "http://192.168.0.100/androidwebservice/getdata.php";
-    private final int REQUEST_CODE = 123;
+    final String urlGetData = "http://192.168.0.101/androidwebservice/getdata.php";
+    final String urlDelete = "http://192.168.0.101/androidwebservice/delete.php";
+    public static final int REQUEST_CODE = 123;
 
     ListView listStudent;
     ArrayList<Student> students;
@@ -88,6 +94,30 @@ public class MainActivity extends AppCompatActivity {
             getData(urlGetData);
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    public void deleteStudent(int id) {
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, urlDelete,
+                response -> {
+                    if (response.trim().equals("succeeded")) {
+                        Toast.makeText(this, "Succeeded!", Toast.LENGTH_SHORT).show();
+                        getData(urlGetData);
+                    }
+                },
+                error -> {
+                    Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
+                    Log.d("RETURN", "Error");
+                }
+        ) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("inputId", String.valueOf(id));
+                return params;
+            }
+        };
+        requestQueue.add(stringRequest);
     }
 
     @Override
